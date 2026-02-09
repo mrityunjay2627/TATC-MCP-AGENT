@@ -1,0 +1,9 @@
+tatc
+pydantic
+mcp
+pandas
+geopandas
+requests
+python-dotenv
+google-genai
+google-generativeai
