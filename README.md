@@ -23,7 +23,7 @@
 
 ---
 
-## 🎯 Overview
+## Overview
 
 This project demonstrates how Large Language Models (LLMs) can orchestrate complex aerospace simulation workflows through three progressive enhancement techniques:
 
@@ -36,7 +36,7 @@ The framework integrates with **TAT-C** (Tradespace Analysis Toolkit for Constel
 
 ---
 
-## ✨ Key Features
+## Key Features
 
 - 🛰️ **Natural Language Interface**: Ask questions about satellite missions in plain English
 - 🔧 **4 MCP Tools**: Single-satellite analysis, constellation design, parametric studies, ground tracks
@@ -47,7 +47,7 @@ The framework integrates with **TAT-C** (Tradespace Analysis Toolkit for Constel
 
 ---
 
-## 🏗️ Architecture
+## Architecture
 
 ```
 ┌─────────────────┐
@@ -80,7 +80,7 @@ The framework integrates with **TAT-C** (Tradespace Analysis Toolkit for Constel
 
 ---
 
-## 📦 Installation
+## Installation
 
 ### Prerequisites
 
@@ -108,7 +108,7 @@ python -c "import tatc; print('TAT-C installed successfully')"
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Running the System
 
@@ -139,7 +139,7 @@ over a 24-hour period.
 
 ---
 
-## 🔬 Understanding the Phases
+## Understanding the Phases
 
 ### Phase 1: Baseline (No Enhancements)
 
@@ -259,7 +259,7 @@ validate_coordinates(33.4255, -111.9400, "Tempe")
 
 ---
 
-## 📊 Example Scenarios
+## Example Scenarios
 
 ### Scenario 1: Basic Single Satellite Analysis
 
@@ -662,7 +662,7 @@ Reason: This tests reasoning, not tool use - all phases handle it
 
 ---
 
-## 🎯 Quick Reference: When Each Phase Excels
+## Quick Reference: When Each Phase Excels
 
 | Scenario | Baseline | ICL | RAG | Winner |
 |----------|----------|-----|-----|--------|
@@ -684,7 +684,7 @@ Reason: This tests reasoning, not tool use - all phases handle it
 
 ---
 
-## 👤 Human-in-the-Loop (HITL)
+## Human-in-the-Loop (HITL)
 
 ### When to Use HITL
 
@@ -714,7 +714,7 @@ python gemini_app_hitl.py --hitl auto
 **HITL Workflow**:
 
 ```
-🤔 HUMAN VERIFICATION REQUIRED
+HUMAN VERIFICATION REQUIRED
 ══════════════════════════════════════════════════════════════════════
 
 Tool: full_mission_analysis
@@ -787,7 +787,7 @@ Overall Confidence = (
 
 ---
 
-## 🧪 Running Evaluations
+## Running Evaluations
 
 ### Complete Three-Phase Evaluation
 
@@ -831,7 +831,7 @@ IMPROVEMENT ANALYSIS
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 
 ```
 tatc-mcp-framework/
@@ -861,7 +861,7 @@ tatc-mcp-framework/
 
 ---
 
-## 🎓 Citation
+## Citation
 
 If you use this framework in your research, please cite:
 
@@ -877,7 +877,7 @@ If you use this framework in your research, please cite:
 
 ---
 
-## 📝 Key Takeaways
+## Key Takeaways
 
 ### What Makes This Different?
 
@@ -907,7 +907,7 @@ If you use this framework in your research, please cite:
 
 ---
 
-## 📧 Contact
+## Contact
 
 For questions or issues, contact:
 - **Priyanshu M Sharma**: pmsharma@asu.edu
@@ -915,7 +915,7 @@ For questions or issues, contact:
 
 ---
 
-## 📄 License
+## License
 
 MIT License - See LICENSE file for details
 
