@@ -422,13 +422,13 @@ async def run_complete_evaluation():
     tracker.add_phase(metrics2, results2)
     
     # Cooling period between phases
-    print("\n⏳ Cooling period (30 seconds)...")
+    print("\nCooling period (30 seconds)...")
     await asyncio.sleep(30)
     
     # PHASE 3: Retrieval-Augmented Generation
     print("\n\n### PHASE 3: RAG (LOCATION DATABASE ACTIVE) ###")
-    print("  ℹ️  RAG operates via location_name parameter")
-    print("\n⚠️  RECOMMENDED: Restart mcp_server.py to clear state")
+    print("  ℹRAG operates via location_name parameter")
+    print("\nRECOMMENDED: Restart mcp_server.py to clear state")
     print("  Press Enter when ready, or Ctrl+C to stop...")
     input()
     
@@ -459,10 +459,10 @@ async def run_complete_evaluation():
     with open(latex_file, 'w') as f:
         f.write(latex_table)
     
-    print(f"\n✓ Detailed results saved to results/detailed_results.csv")
-    print(f"✓ LaTeX table saved to results/metrics_table.tex")
-    print(f"✓ All results saved to results/")
-    print("\n🎉 Evaluation complete! Check results/ directory for metrics.")
+    print(f"\nDetailed results saved to results/detailed_results.csv")
+    print(f"LaTeX table saved to results/metrics_table.tex")
+    print(f"All results saved to results/")
+    print("\nEvaluation complete! Check results/ directory for metrics.")
 
 
 if __name__ == "__main__":
