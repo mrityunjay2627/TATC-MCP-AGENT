@@ -7,7 +7,7 @@
 
 ---
 
-## 📋 Table of Contents
+## Table of Contents
 
 - [Overview](#overview)
 - [Key Features](#key-features)
@@ -38,12 +38,12 @@ The framework integrates with **TAT-C** (Tradespace Analysis Toolkit for Constel
 
 ## Key Features
 
-- 🛰️ **Natural Language Interface**: Ask questions about satellite missions in plain English
-- 🔧 **4 MCP Tools**: Single-satellite analysis, constellation design, parametric studies, ground tracks
-- 🗺️ **RAG Location Database**: 50+ cities with automatic coordinate resolution
-- 🤖 **ICL Prompt Engineering**: Structured prompts with semantic mappings
-- 👤 **HITL Safety Net**: Confidence-based human verification
-- 📊 **Comprehensive Metrics**: Track workflow correctness, hallucination rates, runtime
+- **Natural Language Interface**: Ask questions about satellite missions in plain English
+- **4 MCP Tools**: Single-satellite analysis, constellation design, parametric studies, ground tracks
+- **RAG Location Database**: 50+ cities with automatic coordinate resolution
+- **ICL Prompt Engineering**: Structured prompts with semantic mappings
+- **HITL Safety Net**: Confidence-based human verification
+- **Comprehensive Metrics**: Track workflow correctness, hallucination rates, runtime
 
 ---
 
@@ -100,7 +100,7 @@ pip install -r requirements.txt --break-system-packages
 
 # 3. Create .env file with your API key
 echo "API_KEY=your_gemini_api_key_here" > .env
-echo "GEMINI_MODEL=gemini-2.0-flash-exp" >> .env
+echo "GEMINI_MODEL=gemini-2.5-flash-exp" >> .env
 
 # 4. Verify installation
 python -c "import tatc; print('TAT-C installed successfully')"
@@ -132,7 +132,7 @@ User > What is the mean revisit period over Tempe for NOAA 20 with VIIRS?
     instrument_name: VIIRS
     location_name: Tempe
 
-🤖 AI Analyst >> The mean revisit time over Tempe, Arizona for the VIIRS 
+AI Analyst >> The mean revisit time over Tempe, Arizona for the VIIRS 
 instrument on NOAA 20 is approximately 11.50 hours based on 3 passes 
 over a 24-hour period.
 ```
@@ -912,39 +912,69 @@ KEY FINDINGS:
 
 ### Detailed Results Storage
 
-All evaluation results are saved in JSON format:
+All evaluation results are saved with timestamps in both CSV and JSON formats:
 
 ```
-results_baseline/
-├── query_1_result.json
-├── query_2_result.json
-...
-└── query_12_result.json
-
-results_icl/
-├── query_1_result.json
-...
-
-results_rag/
-├── query_1_result.json
-...
-
-results_hitl/
-├── scenario_1_result.json
-...
-└── scenario_6_result.json
+evaluation_results/
+├── results_baseline_YYYYMMDD_HHMMSS.csv
+├── results_baseline_YYYYMMDD_HHMMSS.json
+├── results_icl_YYYYMMDD_HHMMSS.csv
+├── results_icl_YYYYMMDD_HHMMSS.json
+├── results_rag_YYYYMMDD_HHMMSS.csv
+├── results_rag_YYYYMMDD_HHMMSS.json
+├── results_hitl_YYYYMMDD_HHMMSS.csv
+└── results_hitl_YYYYMMDD_HHMMSS.json
 ```
 
-Each JSON file contains:
+**Example filenames** (from actual run):
+```
+results_baseline_20260422_161803.csv
+results_baseline_20260422_161803.json
+results_icl_20260422_161804.csv
+results_icl_20260422_161804.json
+results_rag_20260422_161806.csv
+results_rag_20260422_161806.json
+results_hitl_20260422_161806.csv
+results_hitl_20260422_161806.json
+```
+
+**CSV Format** (results_baseline_YYYYMMDD_HHMMSS.csv):
+- Tabular format with columns: Query ID, Query Text, Tool Called, Parameters, Success, Runtime
+- Easy to import into Excel/Google Sheets for analysis
+- Quick visualization of pass/fail patterns
+
+**JSON Format** (results_baseline_YYYYMMDD_HHMMSS.json):
+- Complete structured data for each query
 - Full LLM response with reasoning
-- Tool calls made (if any)
-- Parameters used
+- Tool calls with all parameters
 - Final answer extracted
-- Execution time
-- Success/failure status
+- Execution timestamps
 - Error messages (if any)
 
----
+**JSON Structure Example**:
+```json
+{
+  "query_1": {
+    "query": "What is the mean revisit time over Phoenix for NOAA 20?",
+    "llm_response": "To answer this, I'll use the full_mission_analysis tool...",
+    "tool_calls": [
+      {
+        "tool": "full_mission_analysis",
+        "parameters": {
+          "satellite_name": "NOAA 20",
+          "location_name": "Phoenix",
+          "instrument_name": "VIIRS"
+        }
+      }
+    ],
+    "final_answer": "Mean revisit time: 11.5 hours",
+    "success": true,
+    "runtime_seconds": 7.8,
+    "timestamp": "2026-04-22T16:18:03"
+  },
+  ...
+}
+```
 
 ---
 
@@ -952,48 +982,42 @@ Each JSON file contains:
 
 ### Version 2.0 Updates (April 2026)
 
-#### 🆕 Extended Test Suite (12 → 42 Test Cases)
+#### Extended Test Suite (12 → 42 Test Cases)
 - Added 6 edge case queries testing robustness
 - Comprehensive HITL confidence scoring validation
 - Total test coverage: 36 baseline + 6 HITL = 42 cases
 
-#### 📊 Enhanced Evaluation Framework
+#### Enhanced Evaluation Framework
 - **New script**: `run_evaluation_final.py` with detailed per-query breakdown
 - **JSON result storage**: All responses saved for post-analysis
 - **LLM response tracking**: Full reasoning chains captured
 - **UTF-8 encoding**: Proper handling of special characters
 
-#### 🎯 Improved Metrics Reporting
+#### Improved Metrics Reporting
 - Per-query pass/fail visualization
 - Confidence score distribution analysis
 - Tool invocation efficiency tracking (0.25 → 1.00)
 - Runtime overhead measurement
 
-#### 🔧 Platform Compatibility Fixes
+#### Platform Compatibility Fixes
 - **Windows 11 stability**: Event loop policy configuration
 - **Memory management**: Conversation history trimming (10-message limit)
 - **Async handling**: ThreadPoolExecutor for blocking operations
 - **Connection pooling**: Proper keepalive timeout handling
 
-#### 📈 Performance Improvements
+#### Performance Improvements
 - **Baseline**: 33.3% → More realistic than simulated 50%
 - **ICL**: 91.7% → Better than expected 83%
 - **RAG**: 100% → Perfect correctness achieved
 - **Zero hallucinations**: Maintained across all phases
 
-#### 🧪 New Test Queries Added
+#### New Test Queries Added
 1. **Q7 (Typo)**: "Pheonix" → Tests fuzzy matching
 2. **Q8 (Validation)**: Wrong hemisphere → Tests coordinate checking
 3. **Q9 (Inference)**: MODIS → Tests ambiguous instrument mapping
 4. **Q10 (Defaulting)**: Missing params → Tests parameter inference
 5. **Q11 (Scaling)**: 12/4 constellation → Tests large configurations
 6. **Q12 (Comparison)**: 6 vs 9 satellites → Tests multi-step reasoning
-
-#### 📝 Documentation Enhancements
-- **Publication-ready report**: 27-page LaTeX document
-- **4 TikZ figures**: Architecture, workflow, HITL, RAG comparison
-- **4 comprehensive tables**: Results, per-query, RAG value, HITL
-- **Professional formatting**: Two-column ACM-style layout
 
 ---
 
@@ -1020,20 +1044,17 @@ tatc-mcp-framework/
 ├── gemini_app_hitl.py          # HITL-enabled client (3 modes)
 │
 ├── run_evaluation.py           # Legacy 6-query evaluation (deprecated)
-├── run_evaluation_final.py     # ⭐ NEW: 12-query comprehensive suite
+├── run_evaluation_final.py     # 12-query comprehensive suite
 │
-├── results_baseline/           # ⭐ NEW: Baseline phase results (JSON)
-├── results_icl/                # ⭐ NEW: ICL phase results (JSON)
-├── results_rag/                # ⭐ NEW: RAG phase results (JSON)
-├── results_hitl/               # ⭐ NEW: HITL scenario results (JSON)
-│
-├── figures/                    # ⭐ NEW: TikZ source files
-│   ├── figure1_architecture.tex
-│   ├── figure2_workflow.tex
-│   ├── figure3_hitl.tex
-│   └── figure4_rag_vs_icl.tex
-│
-├── FINAL_COMPLETE_REPORT.tex   # ⭐ NEW: Publication-ready LaTeX
+├── evaluation_results/         # All test results (auto-generated)
+│   ├── results_baseline_YYYYMMDD_HHMMSS.csv
+│   ├── results_baseline_YYYYMMDD_HHMMSS.json
+│   ├── results_icl_YYYYMMDD_HHMMSS.csv
+│   ├── results_icl_YYYYMMDD_HHMMSS.json
+│   ├── results_rag_YYYYMMDD_HHMMSS.csv
+│   ├── results_rag_YYYYMMDD_HHMMSS.json
+│   ├── results_hitl_YYYYMMDD_HHMMSS.csv
+│   └── results_hitl_YYYYMMDD_HHMMSS.json
 │
 ├── .env                        # API keys (create this)
 ├── requirements.txt            # Python dependencies
@@ -1043,20 +1064,17 @@ tatc-mcp-framework/
 ### Key Files Explained
 
 **Evaluation Scripts:**
-- `run_evaluation_final.py` ⭐ - **USE THIS**: Comprehensive 42-test suite
+- `run_evaluation_final.py` **USE THIS**: Comprehensive 42-test suite
 - `run_evaluation.py` - Legacy 18-test suite (kept for compatibility)
 
 **Client Applications:**
 - `gemini_app.py` - Standard interactive mode
 - `gemini_app_hitl.py` - HITL mode with `--hitl [auto|always|never]` flag
 
-**Results Directories:**
-- `results_*/` - Auto-generated JSON files with full LLM responses
-- Each query saved with: response, tool calls, parameters, timing
-
-**Documentation:**
-- `FINAL_COMPLETE_REPORT.tex` - Complete academic paper (27 pages)
-- `figures/` - Professional TikZ diagrams for publication
+**Results Directory:**
+- `evaluation_results/` - Auto-generated timestamped CSV + JSON files
+- Each run creates 8 files (4 phases × 2 formats)
+- Timestamp format: `YYYYMMDD_HHMMSS` (e.g., `20260422_161803`)
 
 ---
 
@@ -1102,7 +1120,7 @@ If you use this framework in your research, please cite:
 - Run with ICL (default `ROUTER_SYSTEM`)
 - Run with HITL (`gemini_app_hitl.py --hitl auto`)
 
-**See the difference!** 🚀
+**See the difference!**
 
 ---
 
