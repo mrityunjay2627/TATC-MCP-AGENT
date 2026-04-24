@@ -1138,4 +1138,4 @@ MIT License - See LICENSE file for details
 
 ---
 
-**Built with ❤️ for the aerospace and AI communities**
+**Built with ❤️ for the Industrial AI communities**
