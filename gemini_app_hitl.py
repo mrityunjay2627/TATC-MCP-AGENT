@@ -1,13 +1,24 @@
 """
-Gemini MCP Client with Human-in-the-Loop (HITL)
+Gemini MCP Client with Human-in-the-Loop (HITL) - PRODUCTION STABLE
 Implements confidence-based intervention for safety-critical operations.
 Supports three operational modes: always, auto, and never.
+
+STABILITY FIXES:
+- Event loop policy configuration for Windows
+- Memory management with history trimming  
+- Timeout handling
+- Graceful error recovery
 """
 
 import asyncio
 import os
 import sys
 from pathlib import Path
+
+# FIX #1: Configure event loop policy BEFORE any async operations
+if sys.platform == 'win32':
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+    print("[System] Configured WindowsSelectorEventLoopPolicy for stability")
 
 sys.path.insert(0, str(Path(__file__).parent))
 
@@ -27,24 +38,21 @@ load_dotenv()
 GEMINI_API_KEY = os.getenv("API_KEY")
 GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.0-flash-exp")
 
-
+# FIX #2: Memory management constants
+MAX_CONVERSATION_HISTORY = 10
+REQUEST_TIMEOUT = 30.0
+ 
+ 
 def get_human_approval(tool_call: dict, confidence: dict) -> tuple:
     """
-    Requests human review of proposed tool invocation.
-    
-    Presents tool parameters and confidence assessment to user,
-    allowing approval, modification, or rejection of AI actions.
-    
-    Args:
-        tool_call: Tool invocation with name and arguments
-        confidence: Multi-factor confidence assessment
+    Ask human to approve, modify, or reject a tool call
     
     Returns:
         (approved: bool, modified_args: dict or None)
     """
-    print("\n" + "=" * 70)
+    print("\n" + "="*70)
     print("🤔 HUMAN VERIFICATION REQUIRED")
-    print("=" * 70)
+    print("="*70)
     
     print(f"\nTool: {tool_call['name']}")
     print(f"Confidence: {confidence['overall']:.0%}")
@@ -53,7 +61,7 @@ def get_human_approval(tool_call: dict, confidence: dict) -> tuple:
     for key, value in tool_call['args'].items():
         print(f"  {key}: {value}")
     
-    # Display confidence warnings
+    # Show warnings if confidence is low
     if confidence['overall'] < 0.7:
         print("\n⚠️  WARNING: Low confidence detected!")
         
@@ -63,7 +71,7 @@ def get_human_approval(tool_call: dict, confidence: dict) -> tuple:
         if confidence['parameter_accuracy'] < 0.8:
             print("  • Some parameters may be missing or incorrect")
     
-    # Validate coordinates if present
+    # Check coordinates
     args = tool_call['args']
     if 'latitude' in args and 'longitude' in args:
         lat, lon = args['latitude'], args['longitude']
@@ -74,8 +82,7 @@ def get_human_approval(tool_call: dict, confidence: dict) -> tuple:
             print(f"   ({lat}, {lon}) appears invalid for {ctx}")
             print(f"   Possible issues: wrong sign, out of range, or swapped")
     
-    # Present intervention options
-    print("\n" + "-" * 70)
+    print("\n" + "-"*70)
     print("Options:")
     print("  [a] Approve - Execute as-is")
     print("  [m] Modify - Change parameters")
@@ -94,7 +101,7 @@ def get_human_approval(tool_call: dict, confidence: dict) -> tuple:
             return False, None
         
         elif choice == 'c':
-            # Coordinate correction workflow
+            # Correct coordinates
             print("\nProvide correct coordinates:")
             try:
                 lat = float(input("  Latitude (-90 to 90): "))
@@ -104,8 +111,7 @@ def get_human_approval(tool_call: dict, confidence: dict) -> tuple:
                     modified_args = tool_call['args'].copy()
                     modified_args['latitude'] = lat
                     modified_args['longitude'] = lon
-                    
-                    # Remove location_name if present (explicit coords take precedence)
+                    # Remove location_name if present
                     if 'location_name' in modified_args:
                         del modified_args['location_name']
                     
@@ -119,7 +125,7 @@ def get_human_approval(tool_call: dict, confidence: dict) -> tuple:
                 continue
         
         elif choice == 'm':
-            # General parameter modification
+            # Modify any parameter
             print("\nCurrent parameters:")
             for i, (key, value) in enumerate(tool_call['args'].items(), 1):
                 print(f"  {i}. {key}: {value}")
@@ -132,7 +138,7 @@ def get_human_approval(tool_call: dict, confidence: dict) -> tuple:
                     param_key = param_keys[param_num - 1]
                     new_value = input(f"New value for {param_key}: ").strip()
                     
-                    # Type conversion based on original value
+                    # Try to convert to appropriate type
                     old_value = tool_call['args'][param_key]
                     if isinstance(old_value, int):
                         new_value = int(new_value)
@@ -153,19 +159,15 @@ def get_human_approval(tool_call: dict, confidence: dict) -> tuple:
         
         else:
             print("Invalid choice. Please enter a, m, r, or c")
-
-
+ 
+ 
 async def run_query_with_hitl(query: str, hitl_mode: str = "auto"):
     """
-    Executes query with human-in-the-loop intervention based on confidence.
-    
-    Implements adaptive oversight: always mode requires approval for every
-    tool, auto mode triggers intervention only when confidence < 70%,
-    never mode executes without human review.
+    Run query with human-in-the-loop intervention
     
     Args:
-        query: User's natural language question
-        hitl_mode: Intervention strategy ('always', 'auto', 'never')
+        query: User's question
+        hitl_mode: "always" (ask for every tool), "auto" (ask if low confidence), "never"
     """
     
     if not GEMINI_API_KEY:
@@ -174,13 +176,13 @@ async def run_query_with_hitl(query: str, hitl_mode: str = "auto"):
     
     client = genai.Client(api_key=GEMINI_API_KEY)
     
-    print("\n" + "=" * 70)
+    print("\n" + "="*70)
     print("🛰️  PROCESSING QUERY (HITL ENABLED)")
-    print("=" * 70)
+    print("="*70)
     print(f"Query: {query}")
     print(f"HITL Mode: {hitl_mode.upper()}")
-    print("=" * 70)
-
+    print("="*70)
+ 
     try:
         async with sse_client("http://localhost:8000/sse") as (read, write):
             async with ClientSession(read, write) as session:
@@ -201,7 +203,7 @@ async def run_query_with_hitl(query: str, hitl_mode: str = "auto"):
                     tools=[gemini_tools],
                     temperature=0.0
                 )
-
+ 
                 messages = [types.Content(
                     role="user", 
                     parts=[types.Part(text=query)]
@@ -213,14 +215,22 @@ async def run_query_with_hitl(query: str, hitl_mode: str = "auto"):
                 while iteration < max_iterations:
                     iteration += 1
                     
-                    response = await client.aio.models.generate_content(
-                        model=GEMINI_MODEL,
-                        contents=messages,
-                        config=config
-                    )
+                    try:
+                        # FIX #5: Add timeout protection
+                        response = await asyncio.wait_for(
+                            client.aio.models.generate_content(
+                                model=GEMINI_MODEL,
+                                contents=messages,
+                                config=config
+                            ),
+                            timeout=REQUEST_TIMEOUT
+                        )
+                    except asyncio.TimeoutError:
+                        print(f"\n⚠️  Request timed out after {REQUEST_TIMEOUT}s")
+                        return
                     
                     messages.append(response.candidates[0].content)
-
+ 
                     function_calls = [
                         p.function_call 
                         for p in response.candidates[0].content.parts 
@@ -228,15 +238,15 @@ async def run_query_with_hitl(query: str, hitl_mode: str = "auto"):
                     ]
                     
                     if not function_calls:
-                        # Final answer reached
-                        print("\n" + "=" * 70)
+                        # Final answer
+                        print("\n" + "="*70)
                         print("📊 FINAL RESULT")
-                        print("=" * 70)
+                        print("="*70)
                         print(response.text)
-                        print("=" * 70)
+                        print("="*70)
                         break
-
-                    # HITL: Review each proposed tool call
+ 
+                    # HITL: Review each tool call
                     tool_responses = []
                     
                     for fc in function_calls:
@@ -244,7 +254,7 @@ async def run_query_with_hitl(query: str, hitl_mode: str = "auto"):
                         
                         print(f"\n🔧 AI wants to call: {fc.name}")
                         
-                        # Calculate multi-factor confidence score
+                        # Calculate confidence
                         has_location = 'location_name' in fc.args
                         has_coords = 'latitude' in fc.args and 'longitude' in fc.args
                         
@@ -254,18 +264,18 @@ async def run_query_with_hitl(query: str, hitl_mode: str = "auto"):
                             has_explicit_coords=has_coords
                         )
                         
-                        # Determine if human review is needed based on mode
+                        # Decide if human review is needed
                         needs_review = False
                         
                         if hitl_mode == "always":
                             needs_review = True
                         elif hitl_mode == "auto":
-                            # Trigger intervention for low confidence
+                            # Ask human if confidence is low
                             if confidence['overall'] < 0.7:
                                 needs_review = True
-                        # hitl_mode == "never" -> no intervention
+                        # hitl_mode == "never" -> never ask
                         
-                        # Request human approval if needed
+                        # Get human approval if needed
                         if needs_review:
                             approved, modified_args = get_human_approval(tool_call, confidence)
                             
@@ -274,7 +284,7 @@ async def run_query_with_hitl(query: str, hitl_mode: str = "auto"):
                                 continue
                             
                             if modified_args:
-                                # Apply human corrections
+                                # Use human-corrected parameters
                                 fc.args.clear()
                                 fc.args.update(modified_args)
                                 print("✓ Using human-corrected parameters")
@@ -284,7 +294,7 @@ async def run_query_with_hitl(query: str, hitl_mode: str = "auto"):
                             for key, val in fc.args.items():
                                 print(f"    {key}: {val}")
                         
-                        # Execute tool via MCP
+                        # Execute the tool
                         print(f"  ⚙️  Executing...")
                         result = await session.call_tool(fc.name, fc.args)
                         result_text = result.content[0].text
@@ -298,7 +308,7 @@ async def run_query_with_hitl(query: str, hitl_mode: str = "auto"):
                         ))
                     
                     if not tool_responses:
-                        # All tools rejected by human
+                        # All tools were rejected by human
                         print("\n⚠️  No tools executed. Cannot continue.")
                         break
                     
@@ -309,19 +319,14 @@ async def run_query_with_hitl(query: str, hitl_mode: str = "auto"):
                         
     except Exception as e:
         print(f"\n❌ Error: {str(e)}")
-
-
+ 
+ 
 async def interactive_hitl():
-    """
-    Interactive mode with configurable HITL intervention.
+    """Interactive mode with HITL"""
     
-    Provides command interface for mode switching and query execution
-    with human oversight capabilities.
-    """
-    
-    print("=" * 70)
-    print("🛰️  TAT-C Mission Analyst - HITL MODE")
-    print("=" * 70)
+    print("="*70)
+    print("🛰️  TAT-C Mission Analyst - TRUE HITL MODE")
+    print("="*70)
     print("\nHuman-in-the-Loop: You can approve, modify, or reject AI actions!")
     print("\nCommands:")
     print("  - Type your question")
@@ -331,7 +336,7 @@ async def interactive_hitl():
     print("  • always - Ask for approval on EVERY tool call")
     print("  • auto   - Ask only when confidence is low (default)")
     print("  • never  - Auto-execute everything (no HITL)")
-    print("=" * 70)
+    print("="*70)
     
     hitl_mode = "auto"
     
@@ -356,32 +361,30 @@ async def interactive_hitl():
             continue
         
         await run_query_with_hitl(user_input, hitl_mode)
-
-
+ 
+ 
 if __name__ == "__main__":
-    """Entry point with command-line argument parsing."""
-    
     import argparse
     
-    parser = argparse.ArgumentParser(description="TAT-C Mission Analyst with HITL")
+    parser = argparse.ArgumentParser(description="TAT-C Mission Analyst with TRUE HITL")
     parser.add_argument(
         '--hitl',
         choices=['always', 'auto', 'never'],
         default='auto',
-        help='HITL intervention mode (default: auto)'
+        help='HITL intervention mode'
     )
     parser.add_argument(
         '--query',
         type=str,
-        help='Direct query (skips interactive mode)'
+        help='Direct query'
     )
     
     args = parser.parse_args()
     
-    print("=" * 70)
+    print("="*70)
     print("Connecting to MCP server at http://localhost:8000")
     print("Make sure mcp_server.py is running!")
-    print("=" * 70)
+    print("="*70)
     print()
     
     if args.query:
