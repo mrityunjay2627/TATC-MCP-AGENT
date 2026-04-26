@@ -133,7 +133,7 @@ async def run_query_with_hitl(query: str, hitl_mode: str = "auto", conversation_
     client = genai.Client(api_key=GEMINI_API_KEY)
     
     print("\n" + "="*70)
-    print("🛰️  PROCESSING QUERY (HITL ENABLED)")
+    print("PROCESSING QUERY (HITL ENABLED)")
     print("="*70)
     print(f"Query: {query}")
     print(f"HITL Mode: {hitl_mode.upper()}")
@@ -187,7 +187,7 @@ async def run_query_with_hitl(query: str, hitl_mode: str = "auto", conversation_
                     
                     if not function_calls:
                         print("\n" + "="*70)
-                        print("📊 FINAL RESULT")
+                        print("FINAL RESULT")
                         print("="*70)
                         print(response.text)
                         print("="*70)
@@ -265,7 +265,7 @@ async def run_query_with_hitl(query: str, hitl_mode: str = "auto", conversation_
 async def interactive_hitl(initial_mode: str = "auto"):
     """Interactive HITL mode with conversation memory"""
     print("="*70)
-    print("🛰️  TAT-C Mission Analyst - HITL MODE")
+    print("TAT-C Mission Analyst - HITL MODE")
     print("="*70)
     print("\nHuman-in-the-Loop: Approve, modify, or reject AI actions!")
     print("\nCommands:")
@@ -291,7 +291,7 @@ async def interactive_hitl(initial_mode: str = "auto"):
             continue
         
         if user_input.lower() in ["exit", "quit"]:
-            print("\n👋 Goodbye!")
+            print("\nGoodbye!")
             break
         
         if user_input.lower() == "clear":

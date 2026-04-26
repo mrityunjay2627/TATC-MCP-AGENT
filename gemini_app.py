@@ -58,7 +58,7 @@ async def run_mission_analyst():
     client = genai.Client(api_key=GEMINI_API_KEY)
     
     print("=" * 70)
-    print("🛰️  TAT-C Satellite Mission Analyst - PRODUCTION STABLE")
+    print("TAT-C Satellite Mission Analyst - PRODUCTION STABLE")
     print("=" * 70)
     print("✓ RAG-Enhanced | Location Database Active")
     print("✓ Memory Management | Conversation History Limited")
@@ -96,7 +96,7 @@ async def run_mission_analyst():
                     user_input = input("User > ").strip()
                     
                     if user_input.lower() in ["exit", "quit"]:
-                        print("\nGoodbye! 👋")
+                        print("\nGoodbye!")
                         break
 
                     messages.append(types.Content(
@@ -147,7 +147,7 @@ async def run_mission_analyst():
                             
                             if not function_calls:
                                 # Final natural language response received
-                                print(f"\n🤖 AI Analyst >> {response.text}\n")
+                                print(f"\nAI Analyst >> {response.text}\n")
                                 
                                 # Flush context after successful completion
                                 if "SUCCESS" in response.text.upper():
