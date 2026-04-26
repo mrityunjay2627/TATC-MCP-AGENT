@@ -94,7 +94,7 @@ class PhaseEvaluator:
         self.phase_name = phase_name
         self.system_prompt = system_prompt
         self.client = genai.Client(api_key=api_key)
-        self.model = os.getenv("GEMINI_MODEL", "gemini-2.0-flash-exp")
+        self.model = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
         self.results = []
     
     async def run_single_test(self, test_case: dict) -> TestResult:

@@ -15,8 +15,6 @@ Usage:
     python run_evaluation_final.py --phase rag
     python run_evaluation_final.py --phase hitl
     
-    # Custom output directory
-    python run_evaluation_final.py --phase all --output-dir ./my_results
 """
 
 import asyncio
