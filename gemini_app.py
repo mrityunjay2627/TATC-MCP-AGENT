@@ -36,7 +36,7 @@ load_dotenv()
 
 # Configuration from environment
 GEMINI_API_KEY = os.getenv("API_KEY")
-GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.0-flash-exp")
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
 
 # FIX #2: Configuration constants for memory management
 MAX_CONVERSATION_HISTORY = 10  # Keep only last 10 message pairs
